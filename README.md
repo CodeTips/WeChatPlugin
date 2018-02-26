@@ -1,0 +1,2 @@
+# WeChatPlugin
+Jailbreak
