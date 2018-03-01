@@ -1,0 +1,9 @@
+Package: net.codetips.wechatplugin
+Name: WeChatPlugin
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: 微信小助手!
+Maintainer: Loveletter
+Author: Loveletter
+Section: Tweaks
