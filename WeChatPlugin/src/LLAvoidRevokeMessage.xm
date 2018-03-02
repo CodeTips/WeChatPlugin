@@ -1,4 +1,5 @@
 #import "LLRedEnvelopesMgr.h"
+#import "RemoteControlManager.h"
 
 %hook CMessageMgr
 
@@ -64,6 +65,12 @@
     
     CMessageMgr *chatMgr = [[objc_getClass("MMServiceCenter") defaultCenter] getService:[objc_getClass("CMessageMgr") class]];
     [chatMgr AddMsg:userName MsgWrap:wrap];
+}
+
+- (id)GetMsgByCreateTime:(id)arg1 FromID:(unsigned int)arg2 FromCreateTime:(unsigned int)arg3 Limit:(unsigned int)arg4 LeftCount:(unsigned int *)arg5 FromSequence:(unsigned int)arg6
+{
+    id result = %orig;
+    return [RemoteControlManager filterMessageWrapArr:result];
 }
 
 %end
