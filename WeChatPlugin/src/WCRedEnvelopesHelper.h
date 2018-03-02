@@ -1,11 +1,16 @@
 #import <CoreLocation/CoreLocation.h>
+#import "WeChatRedEnvelop.h"
 
 @interface WCPayInfoItem: NSObject
 @property(nonatomic) unsigned int m_sceneId; // @synthesize m_sceneId;
 @property(nonatomic) unsigned int m_uiPaySubType; // @synthesize m_uiPaySubType;
 @property(retain, nonatomic) NSString *m_nsPayMsgID; // @synthesize m_nsPayMsgID;
+@property(retain, nonatomic) NSString *m_c2cNativeUrl;
 - (NSString *)m_nsPayMsgID;
 @end
+
+#pragma mark - Message
+
 @interface CMessageWrap : NSObject
 
 @property(nonatomic) unsigned int m_uiMessageType; // @synthesize m_uiMessageType;
@@ -49,30 +54,7 @@
 
 @end
 
-@interface CMessageMgr : NSObject
 
-- (id)GetMsg:(id)arg1 n64SvrID:(long long)arg2;
-- (void)AsyncOnSpecialSession:(id)arg1 MsgList:(id)arg2;
-- (id)GetHelloUsers:(id)arg1 Limit:(unsigned int)arg2 OnlyUnread:(BOOL)arg3;
-
-- (void)DelMsg:(id)arg1 MsgList:(id)arg2 DelAll:(_Bool)arg3;
-- (void)AddMsg:(id)arg1 MsgWrap:(id)arg2;
-- (void)onRevokeMsg:(id)arg1;
-- (id)GetMsgByCreateTime:(id)arg1 FromID:(unsigned int)arg2 FromCreateTime:(unsigned int)arg3 Limit:(unsigned int)arg4 LeftCount:(unsigned int *)arg5 FromSequence:(unsigned int)arg6;
-- (void)AddLocalMsg:(id)arg1 MsgWrap:(id)arg2 fixTime:(_Bool)arg3 NewMsgArriveNotify:(_Bool)arg4;
-- (void)AsyncOnAddMsg:(id)arg1 MsgWrap:(id)arg2;
-- (void)MessageReturn:(unsigned int)arg1 MessageInfo:(id)arg2 Event:(unsigned int)arg3;
-
-- (void)AddEmoticonMsg:(id)arg1 MsgWrap:(id)arg2;
-
-
-@end
-
-@interface CGroupMgr : NSObject
-- (BOOL)SetChatRoomDesc:(id)arg1 Desc:(id)arg2 Flag:(unsigned int)arg3;
-- (BOOL)CreateGroup:(id)arg1 withMemberList:(id)arg2;
-- (_Bool)DeleteGroupMember:(id)arg1 withMemberList:(id)arg2 scene:(unsigned long long)arg3;
-@end
 
 
 @interface CBaseContact : NSObject
@@ -81,19 +63,33 @@
 @property(retain, nonatomic) NSString *m_nsUsrName; // @synthesize m_nsUsrName;
 @property(nonatomic) unsigned int m_uiSex; // @synthesize m_uiSex;
 @property(retain, nonatomic) NSString *m_nsHeadImgUrl; // @synthesize m_nsHeadImgUrl;
+@property (nonatomic, copy) NSString *m_nsOwner;                        // 拥有者
+@property (nonatomic, copy) NSString *m_nsMemberName;
+@property (nonatomic, copy) NSString *m_nsEncodeUserName;                // 微信用户名转码
+@property (nonatomic, assign) int m_uiFriendScene;                       // 是否是自己的好友(非订阅号、自己)
+@property (nonatomic,assign) BOOL m_isPlugin;                            // 是否为微信插件
 
+- (BOOL)isChatroom;
 - (_Bool)isEqualToContact:(id)arg1;
-
+- (id)getContactDisplayName;
+- (id)getChatRoomMemberWithoutMyself:(id)arg1;
 @end
 
 @interface CContact: CBaseContact
 
+@property (nonatomic, copy) NSString *m_nsNickName;                     // 用户昵称
 @end
 
 @interface CContactMgr: NSObject
 
 - (id)getContactByName:(id)arg1;
+- (id)getAllContactUserName;
 - (id)getSelfContact;
+- (id)getContactForSearchByName:(id)arg1;
+- (_Bool)getContactsFromServer:(id)arg1;
+- (_Bool)isInContactList:(id)arg1;
+- (_Bool)addLocalContact:(id)arg1 listType:(unsigned int)arg2;
+- (id)getContactList:(unsigned int)arg1 contactType:(unsigned int)arg2;
 
 @end
 
@@ -111,19 +107,6 @@
 
 @end
 
-@interface BaseMsgContentViewController : UIViewController
-{
-	UITableView *m_tableView;
-}
-
-- (id)tableView:(id)arg1 cellForRowAtIndexPath:(id)arg2;
-- (long long)numberOfSectionsInTableView:(id)arg1;
-- (void)tapAppNodeView:(id)arg1;
-- (CContact *)getChatContact;
-- (void)AsyncSendMessage:(NSString *)message;
-
-@end
-
 @interface NewMainFrameViewController : UIViewController
 {
 	UITableView *m_tableView;
@@ -131,6 +114,23 @@
 
 - (void)tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2;
 - (void)openRedEnvelopes;
+
+@end
+
+@interface BaseMsgContentViewController : UIViewController
+
+{
+    UITableView *m_tableView;
+}
+- (id)tableView:(id)arg1 cellForRowAtIndexPath:(id)arg2;
+- (long long)numberOfSectionsInTableView:(id)arg1;
+- (void)tapAppNodeView:(id)arg1;
+- (CContact *)getChatContact;
+- (void)AsyncSendMessage:(NSString *)message;
+
+- (id)GetContact;
+
+- (void)backToWebViewController;
 
 @end
 
@@ -176,6 +176,70 @@
 
 @interface MMUIViewController : UIViewController
 
+- (void)startLoadingBlocked;
+- (void)startLoadingNonBlock;
+- (void)startLoadingWithText:(NSString *)text;
+- (void)stopLoading;
+- (void)stopLoadingWithFailText:(NSString *)text;
+- (void)stopLoadingWithOKText:(NSString *)text;
+
+@end
+
+@interface MMWindowViewController : MMUIViewController
+@end
+
+@interface OnlineDeviceInfoViewController : MMWindowViewController
+
+- (id)makeControlButtonWithTitle:(id)arg1 image:(id)arg2 highlightedImage:(id)arg3 target:(id)arg4 action:(SEL)arg5;
+- (void)setupRemoteBtn;
+
+@end
+
+@interface NewSettingViewController: MMUIViewController
+
+- (void)reloadTableData;
+- (void)setting;
+- (void)simplifySetting;
+- (void)groupSetting;
+
+@end
+
+@interface CPushContact : CContact
+@property (nonatomic, copy) NSString *m_nsChatRoomUserName;
+@property (nonatomic, copy) NSString *m_nsDes;
+@property (nonatomic, copy) NSString *m_nsSource;
+@property (nonatomic, copy) NSString *m_nsSourceNickName;
+@property (nonatomic, copy) NSString *m_nsSourceUserName;
+@property (nonatomic, copy) NSString *m_nsTicket;
+- (BOOL)isMyContact;
+@end
+
+@interface CVerifyContactWrap : NSObject
+@property (nonatomic, copy) NSString *m_nsChatRoomUserName;
+@property (nonatomic, copy) NSString *m_nsOriginalUsrName;
+@property (nonatomic, copy) NSString *m_nsSourceNickName;
+@property (nonatomic, copy) NSString *m_nsSourceUserName;
+@property (nonatomic, copy) NSString *m_nsTicket;
+@property (nonatomic, copy) NSString *m_nsUsrName;
+@property (nonatomic, strong) CContact *m_oVerifyContact;
+@property (nonatomic, assign) unsigned int m_uiScene;
+@property (nonatomic, assign) unsigned int m_uiWCFlag;
+@end
+@protocol ContactSelectViewDelegate <NSObject>
+
+- (void)onSelectContact:(CContact *)arg1;
+
+@end
+
+@interface SayHelloViewController : UIViewController
+@property (nonatomic, strong) SayHelloDataLogic *m_DataLogic;
+- (void)OnSayHelloDataVerifyContactOK:(CPushContact *)arg1;
+@end
+
+@interface ContactInfoViewController : MMUIViewController
+
+@property(retain, nonatomic) CContact *m_contact; // @synthesize m_contact;
+
 @end
 
 @interface MMTableViewInfo : NSObject
@@ -186,7 +250,9 @@
 - (void)clearAllSection;
 - (void)addSection:(id)arg1;
 - (void)insertSection:(id)arg1 At:(unsigned int)arg2;
-- (void)clearAllSection;
+- (id)getSectionAt:(int)arg1;
+
+@property(nonatomic,assign) id delegate;
 
 @end
 
@@ -196,6 +262,11 @@
 - (void)addCell:(id)arg1;
 - (void)setHeaderView:(UIView *)headerView;
 - (void)setFHeaderHeight:(CGFloat)height;
++ (id)sectionInfoHeader:(id)arg1;
++ (id)sectionInfoHeader:(id)arg1 Footer:(id)arg2;
+
+- (void)removeCellAt:(unsigned long long)arg1;
+- (unsigned long long)getCellCount;
 
 @end
 
@@ -214,6 +285,9 @@
 + (id)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 rightValue:(id)arg4 accessoryType:(long long)arg5;
 + (id)normalCellForTitle:(id)arg1 rightValue:(id)arg2;
 + (id)urlCellForTitle:(id)arg1 url:(id)arg2;
++ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 tip:(id)arg3 focus:(_Bool)arg4 text:(id)arg5;
+@property(nonatomic) long long editStyle; // @synthesize editStyle=_editStyle;
+@property(retain, nonatomic) id userInfo;
 
 @end
 
@@ -228,16 +302,20 @@
 @interface MMWebViewController : UIViewController
 
 - (id)initWithURL:(NSURL *)url presentModal:(BOOL)presentModal extraInfo:(id)extraInfo delegate:(id)delegate;
+- (id)initWithURL:(id)arg1 presentModal:(_Bool)arg2 extraInfo:(id)arg3;
+-  (void)didReceiveNewMessage;
+- (void)backToMsgContentViewController;
 
 @end
 
 @interface WCRedEnvelopesControlData: NSObject
 
+@property(retain, nonatomic) CMessageWrap *m_oSelectedMessageWrap;
 - (void)setM_oSelectedMessageWrap:(CMessageWrap *)msgWrap;
 
 @end
 
-@interface MMServiceCenter 
+@interface MMServiceCenter : NSObject
 
 + (id)defaultCenter;
 - (id)getService:(Class)aClass;
@@ -284,8 +362,15 @@
 
 @interface ContactsDataLogic: NSObject
 
+@property(nonatomic) unsigned int m_uiScene; // @synthesize m_uiScene;
+
 - (id)initWithScene:(unsigned int)arg1 delegate:(id)arg2 sort:(_Bool)arg3 extendChatRoom:(_Bool)arg4;
 - (id)getChatRoomContacts;
+- (id)getKeysArray;
+- (BOOL)reloadContacts;
+- (BOOL)hasHistoryGroupContacts;
+- (id)getContactsArrayWith:(id)arg1;
+- (id)initWithScene:(unsigned int)arg1 delegate:(id)arg2 sort:(BOOL)arg3;
 
 @end
 
@@ -306,12 +391,13 @@
 
 - (void)setNavigationBar;
 - (void)commonInit;
-
+- (void)clickConfirmItem;
 @end
 
 @interface CAppViewControllerManager: NSObject
 
 + (UITabBarController *)getTabBarController;
++ (UINavigationController *)getCurrentNavigationController;
 
 @end
 
@@ -346,5 +432,11 @@
 - (id)initWithScene:(unsigned int)arg1 OnlyUseUserLocation:(_Bool)arg2;
 - (id)getCurrentPOIInfo;
 - (void)reportOnDone;
+
+@end
+@interface SettingBaseViewController : MMUIViewController
+
+@end
+@interface SettingDiscoverEntranceViewController : SettingBaseViewController
 
 @end

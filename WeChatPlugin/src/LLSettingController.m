@@ -9,6 +9,7 @@
 #import "LLSettingController.h"
 #import "WCRedEnvelopesHelper.h"
 #import "LLRedEnvelopesMgr.h"
+#import "RemoteControlManager.h"
 #import <objc/runtime.h>
 
 static NSString * const kSettingControllerKey = @"SettingControllerKey";
@@ -32,8 +33,8 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.title = @"Plugin";
     [self commonInit];
-    [self setNavigationBar];
     [self setTableView];
     [self reloadTableData];
 }
@@ -66,13 +67,6 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
     _contactsDataLogic = [[NSClassFromString(@"ContactsDataLogic") alloc] initWithScene:0x0 delegate:nil sort:0x1 extendChatRoom:0x0];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onConfirmFilterChatRoom:) name:@"kConfirmFilterChatRoomNotification" object:nil];
-}
-
-- (void)setNavigationBar{
-    self.title = @"微信助手设置";
-    
-    UIBarButtonItem *saveItem = [NSClassFromString(@"MMUICommonUtil") getBarButtonWithTitle:@"保存" target:self action:@selector(clickSaveItem) style:0 color:[UIColor whiteColor]];
-    self.navigationItem.rightBarButtonItem = saveItem;
 }
 
 - (void)exchangeMethod{
@@ -168,6 +162,9 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
     [revokeMessageSection setHeaderView:[[UIView alloc] initWithFrame:CGRectMake(0,0,0,20)]];
     [revokeMessageSection addCell:openAvoidRevokeMessageCell];
 
+    MMTableViewCellInfo *remoteCellInfo = [objc_getClass("MMTableViewCellInfo") switchCellForSel:@selector(handleRemoteControl:) target:[RemoteControlManager sharedManager] title:@"远程控制" on:[RemoteControlManager sharedManager].isEnableRemoteControl];
+    [revokeMessageSection addCell:remoteCellInfo];
+
     [_tableViewInfo clearAllSection];
 
     [_tableViewInfo addSection:redEnvelopesSection];
@@ -202,7 +199,6 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
     manager.filterRoomDic = _settingParam.filterRoomDic;
     [manager saveVirtualLocation:_settingParam.virtualLocation];
     [manager saveUserSetting]; // 保存用户设置
-    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)openRedEnvelopesSwitchHandler:(UISwitch *)openSwitch{
@@ -329,6 +325,7 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 
 - (void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
+    [self clickSaveItem];
     [self exchangeMethod]; //reset
 }
 

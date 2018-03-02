@@ -2,6 +2,8 @@
 #import "LLRedEnvelopesMgr.h"
 #import "LLSettingController.h"
 #import <AVFoundation/AVFoundation.h>
+#import "RemoteControlManager.h"
+
 %hook WCDeviceStepObject
 
 - (unsigned long)m7StepCount{
@@ -162,7 +164,7 @@
 
 - (void)reloadTableData{
 	%orig;
-    MMTableViewCellInfo *configCell = [%c(MMTableViewCellInfo) normalCellForSel:@selector(configHandler) target:self title:@"WeChat Helper" accessoryType:1];
+    MMTableViewCellInfo *configCell = [%c(MMTableViewCellInfo) normalCellForSel:@selector(configHandler) target:self title:@"Plugin" accessoryType:1];
     MMTableViewSectionInfo *sectionInfo = [%c(MMTableViewSectionInfo) sectionInfoDefaut];
     [sectionInfo addCell:configCell];
     MMTableViewInfo *tableViewInfo = [self valueForKey:@"m_tableViewInfo"];
@@ -200,5 +202,41 @@
 	} 
 	return %orig;
 }
+
+%end
+
+%hook OnlineDeviceInfoViewController
+
+- (void)viewDidAppear:(_Bool)arg1
+{
+    %orig;
+    [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(setupRemoteBtn) userInfo:nil repeats:NO];
+}
+
+%new
+- (void)setupRemoteBtn
+{
+    if([RemoteControlManager sharedManager].enableRemoteCommands.count)
+    {
+        NSMutableArray *controlButtons = [self valueForKey:@"_controlButtons"];
+        UIView *controlView = [controlButtons.firstObject superview];
+        controlView.frame = CGRectMake(controlView.frame.origin.x, controlView.frame.origin.y - 40, controlView.frame.size.width, controlView.frame.size.height);
+        UIView *remoteView = [[UIView alloc] initWithFrame:CGRectMake(controlView.frame.origin.x, controlView.frame.origin.y + controlView.frame.size.height + 10, controlView.frame.size.width, controlView.frame.size.height)];
+        [controlView.superview addSubview:remoteView];
+        NSArray *commands = [RemoteControlManager sharedManager].enableRemoteCommands;
+        for (int i = 0; i < (commands.count > 3 ? 3 : commands.count); i ++) {
+            RemoteControlModel *model = commands[i];
+            NSString *imageName = [model.command componentsSeparatedByString:@"."].lastObject;
+            NSString *imagePath = [PluginPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@@2x.png",imageName]];
+    		NSData *imageData = [NSData dataWithContentsOfFile:imagePath];
+    		UIImage *image = [UIImage imageWithData:imageData scale:2];
+            UIButton *button = [self makeControlButtonWithTitle:model.function image:image highlightedImage:image target:[RemoteControlManager sharedManager] action:@selector(sendRemoteControlCommand:)];
+            button.frame = CGRectMake(i * (81 + (remoteView.frame.size.width - 3 * 81) / 2), 0, button.frame.size.width, button.frame.size.height);
+            button.tag = i + 100;
+            [remoteView addSubview:button];
+        }
+    }
+}
+
 
 %end

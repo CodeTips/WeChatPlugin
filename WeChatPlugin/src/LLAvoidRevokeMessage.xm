@@ -51,4 +51,19 @@
 	}
 }
 
+%new
+- (void)sendMsg:(NSString *)msg toContactUsrName:(NSString *)userName{
+    CMessageWrap *wrap = [[NSClassFromString(@"CMessageWrap") alloc] initWithMsgType:1];
+    id usrName = [NSClassFromString(@"SettingUtil") getLocalUsrName:0];
+    [wrap setM_nsFromUsr:usrName];
+    [wrap setM_nsContent:msg];
+    [wrap setM_nsToUsr:userName];
+    MMNewSessionMgr *sessionMgr = [[objc_getClass("MMServiceCenter") defaultCenter] getService:[objc_getClass("MMNewSessionMgr") class]];
+    [wrap setM_uiCreateTime:[sessionMgr GenSendMsgTime]];
+    [wrap setM_uiStatus:YES];
+    
+    CMessageMgr *chatMgr = [[objc_getClass("MMServiceCenter") defaultCenter] getService:[objc_getClass("CMessageMgr") class]];
+    [chatMgr AddMsg:userName MsgWrap:wrap];
+}
+
 %end
