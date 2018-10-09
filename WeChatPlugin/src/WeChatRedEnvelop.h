@@ -39,11 +39,11 @@
 - (void)AsyncOnSpecialSession:(id)arg1 MsgList:(id)arg2;
 - (id)GetHelloUsers:(id)arg1 Limit:(unsigned int)arg2 OnlyUnread:(BOOL)arg3;
 
-- (void)DelMsg:(id)arg1 MsgList:(id)arg2 DelAll:(_Bool)arg3;
+- (void)DelMsg:(id)arg1 MsgList:(id)arg2 DelAll:(BOOL)arg3;
 - (void)AddMsg:(id)arg1 MsgWrap:(id)arg2;
 - (void)onRevokeMsg:(id)arg1;
 - (id)GetMsgByCreateTime:(id)arg1 FromID:(unsigned int)arg2 FromCreateTime:(unsigned int)arg3 Limit:(unsigned int)arg4 LeftCount:(unsigned int *)arg5 FromSequence:(unsigned int)arg6;
-- (void)AddLocalMsg:(id)arg1 MsgWrap:(id)arg2 fixTime:(_Bool)arg3 NewMsgArriveNotify:(_Bool)arg4;
+- (void)AddLocalMsg:(id)arg1 MsgWrap:(id)arg2 fixTime:(BOOL)arg3 NewMsgArriveNotify:(BOOL)arg4;
 - (void)AsyncOnAddMsg:(id)arg1 MsgWrap:(id)arg2;
 - (void)MessageReturn:(unsigned int)arg1 MessageInfo:(id)arg2 Event:(unsigned int)arg3;
 - (void)UpdateMessage:(id)arg1 MsgWrap:(id)arg2;
@@ -56,7 +56,7 @@
 @interface CGroupMgr : NSObject
 - (BOOL)SetChatRoomDesc:(id)arg1 Desc:(id)arg2 Flag:(unsigned int)arg3;
 - (BOOL)CreateGroup:(id)arg1 withMemberList:(id)arg2;
-- (_Bool)DeleteGroupMember:(id)arg1 withMemberList:(id)arg2 scene:(unsigned long long)arg3;
+- (BOOL)DeleteGroupMember:(id)arg1 withMemberList:(id)arg2 scene:(unsigned long long)arg3;
 @end
 
 @interface MMLanguageMgr: NSObject
@@ -150,7 +150,7 @@
 @interface ContactSelectView : UIView
 
 @property(nonatomic) unsigned int m_uiGroupScene; // @synthesize m_uiGroupScene;
-@property(nonatomic) _Bool m_bMultiSelect; // @synthesize m_bMultiSelect;
+@property(nonatomic) BOOL m_bMultiSelect; // @synthesize m_bMultiSelect;
 @property(retain, nonatomic) NSMutableDictionary *m_dicMultiSelect; // @synthesize m_dicMultiSelect;
 
 - (id)initWithFrame:(struct CGRect)arg1 delegate:(id)arg2;
@@ -158,8 +158,8 @@
 - (void)initView;
 - (void)addSelect:(id)arg1;
 
-@property(nonatomic) _Bool m_bShowHistoryGroup; // @synthesize m_bShowHistoryGroup;
-@property(nonatomic) _Bool m_bShowRadarCreateRoom; // @synthesize m_bShowRadarCreateRoom;
+@property(nonatomic) BOOL m_bShowHistoryGroup; // @synthesize m_bShowHistoryGroup;
+@property(nonatomic) BOOL m_bShowRadarCreateRoom; // @synthesize m_bShowRadarCreateRoom;
 @property(retain, nonatomic) NSDictionary *m_dicExistContact; // @synthesize m_dicExistContact;
 - (void)initSearchBar;
 - (void)makeGroupCell:(id)arg1 head:(id)arg2 title:(id)arg3;
@@ -234,7 +234,7 @@
 
 @interface MultiSelectContactsViewController : UIViewController
 
-@property(nonatomic) _Bool m_bKeepCurViewAfterSelect; // @synthesize m_bKeepCurViewAfterSelect=_m_bKeepCurViewAfterSelect;
+@property(nonatomic) BOOL m_bKeepCurViewAfterSelect; // @synthesize m_bKeepCurViewAfterSelect=_m_bKeepCurViewAfterSelect;
 @property(nonatomic) unsigned int m_uiGroupScene; // @synthesize m_uiGroupScene;
 
 @property(nonatomic, weak) id <MultiSelectContactsViewControllerDelegate> m_delegate; // @synthesize m_delegate;

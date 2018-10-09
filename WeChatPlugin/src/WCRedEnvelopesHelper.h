@@ -70,7 +70,7 @@
 @property (nonatomic,assign) BOOL m_isPlugin;                            // 是否为微信插件
 
 - (BOOL)isChatroom;
-- (_Bool)isEqualToContact:(id)arg1;
+- (BOOL)isEqualToContact:(id)arg1;
 - (id)getContactDisplayName;
 - (id)getChatRoomMemberWithoutMyself:(id)arg1;
 @end
@@ -86,9 +86,9 @@
 - (id)getAllContactUserName;
 - (id)getSelfContact;
 - (id)getContactForSearchByName:(id)arg1;
-- (_Bool)getContactsFromServer:(id)arg1;
-- (_Bool)isInContactList:(id)arg1;
-- (_Bool)addLocalContact:(id)arg1 listType:(unsigned int)arg2;
+- (BOOL)getContactsFromServer:(id)arg1;
+- (BOOL)isInContactList:(id)arg1;
+- (BOOL)addLocalContact:(id)arg1 listType:(unsigned int)arg2;
 - (id)getContactList:(unsigned int)arg1 contactType:(unsigned int)arg2;
 
 @end
@@ -102,8 +102,8 @@
 
 @interface UIViewController (ModalView)
 
-- (void)PresentModalViewController:(id)arg1 animated:(_Bool)arg2;
-- (void)DismissMyselfAnimated:(_Bool)arg1;
+- (void)PresentModalViewController:(id)arg1 animated:(BOOL)arg2;
+- (void)DismissMyselfAnimated:(BOOL)arg1;
 
 @end
 
@@ -142,7 +142,7 @@
 
 @interface UINavigationController (LogicController)
 
-- (void)PushViewController:(id)arg1 animated:(_Bool)arg2;
+- (void)PushViewController:(id)arg1 animated:(BOOL)arg2;
 
 @end
 
@@ -279,13 +279,13 @@
 
 @interface MMTableViewCellInfo : MMTableViewUserInfo
 
-+ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 margin:(double)arg4 tip:(id)arg5 focus:(_Bool)arg6 autoCorrect:(_Bool)arg7 text:(id)arg8 isFitIpadClassic:(_Bool)arg9;
++ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 margin:(double)arg4 tip:(id)arg5 focus:(BOOL)arg6 autoCorrect:(BOOL)arg7 text:(id)arg8 isFitIpadClassic:(BOOL)arg9;
 + (id)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 accessoryType:(long long)arg4;
-+ (id)switchCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 on:(_Bool)arg4;
++ (id)switchCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 on:(BOOL)arg4;
 + (id)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 rightValue:(id)arg4 accessoryType:(long long)arg5;
 + (id)normalCellForTitle:(id)arg1 rightValue:(id)arg2;
 + (id)urlCellForTitle:(id)arg1 url:(id)arg2;
-+ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 tip:(id)arg3 focus:(_Bool)arg4 text:(id)arg5;
++ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 tip:(id)arg3 focus:(BOOL)arg4 text:(id)arg5;
 @property(nonatomic) long long editStyle; // @synthesize editStyle=_editStyle;
 @property(retain, nonatomic) id userInfo;
 
@@ -295,14 +295,14 @@
 
 + (id)getBarButtonWithTitle:(id)arg1 target:(id)arg2 action:(SEL)arg3 style:(int)arg4;
 + (id)getBarButtonWithTitle:(id)arg1 target:(id)arg2 action:(SEL)arg3 style:(int)arg4 color:(id)arg6;
-+ (id)getBarButtonWithImageName:(id)arg1 target:(id)arg2 action:(SEL)arg3 style:(int)arg4 accessibility:(id)arg5 useTemplateMode:(_Bool)arg6;
++ (id)getBarButtonWithImageName:(id)arg1 target:(id)arg2 action:(SEL)arg3 style:(int)arg4 accessibility:(id)arg5 useTemplateMode:(BOOL)arg6;
 
 @end
 
 @interface MMWebViewController : UIViewController
 
 - (id)initWithURL:(NSURL *)url presentModal:(BOOL)presentModal extraInfo:(id)extraInfo delegate:(id)delegate;
-- (id)initWithURL:(id)arg1 presentModal:(_Bool)arg2 extraInfo:(id)arg3;
+- (id)initWithURL:(id)arg1 presentModal:(BOOL)arg2 extraInfo:(id)arg3;
 -  (void)didReceiveNewMessage;
 - (void)backToMsgContentViewController;
 
@@ -352,7 +352,7 @@
 @end
 
 @protocol ContactsDataLogicDelegate <NSObject>
-- (_Bool)onFilterContactCandidate:(CContact *)arg1;
+- (BOOL)onFilterContactCandidate:(CContact *)arg1;
 - (void)onContactsDataChange;
 
 @optional
@@ -364,7 +364,7 @@
 
 @property(nonatomic) unsigned int m_uiScene; // @synthesize m_uiScene;
 
-- (id)initWithScene:(unsigned int)arg1 delegate:(id)arg2 sort:(_Bool)arg3 extendChatRoom:(_Bool)arg4;
+- (id)initWithScene:(unsigned int)arg1 delegate:(id)arg2 sort:(BOOL)arg3 extendChatRoom:(BOOL)arg4;
 - (id)getChatRoomContacts;
 - (id)getKeysArray;
 - (BOOL)reloadContacts;
@@ -429,7 +429,7 @@
 
 @property (nonatomic, weak) id <MMPickLocationViewControllerDelegate> delegate; // @synthesize delegate=_delegate;
 
-- (id)initWithScene:(unsigned int)arg1 OnlyUseUserLocation:(_Bool)arg2;
+- (id)initWithScene:(unsigned int)arg1 OnlyUseUserLocation:(BOOL)arg2;
 - (id)getCurrentPOIInfo;
 - (void)reportOnDone;
 

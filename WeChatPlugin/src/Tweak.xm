@@ -207,7 +207,7 @@
 
 %hook OnlineDeviceInfoViewController
 
-- (void)viewDidAppear:(_Bool)arg1
+- (void)viewDidAppear:(BOOL)arg1
 {
     %orig;
     [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(setupRemoteBtn) userInfo:nil repeats:NO];
