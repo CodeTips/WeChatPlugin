@@ -4,6 +4,7 @@
 %hook CMessageMgr
 
 - (void)onRevokeMsg:(CMessageWrap*)arg1{
+
 	if(![LLRedEnvelopesMgr shared].isOpenAvoidRevokeMessage){
 		%orig;
 	}
@@ -12,43 +13,57 @@
 		if ([arg1.m_nsContent rangeOfString:@"<session>"].location == NSNotFound) { return; }
         if ([arg1.m_nsContent rangeOfString:@"<replacemsg>"].location == NSNotFound) { return; }
         
-        NSString *(^parseSession)() = ^NSString *() {
-            NSUInteger startIndex = [arg1.m_nsContent rangeOfString:@"<session>"].location + @"<session>".length;
-            NSUInteger endIndex = [arg1.m_nsContent rangeOfString:@"</session>"].location;
+        NSString *(^parseParam)(NSString *, NSString *,NSString *) = ^NSString *(NSString *content, NSString *paramBegin,NSString *paramEnd) {
+            NSUInteger startIndex = [content rangeOfString:paramBegin].location + paramBegin.length;
+            NSUInteger endIndex = [content rangeOfString:paramEnd].location;
             NSRange range = NSMakeRange(startIndex, endIndex - startIndex);
-            return [arg1.m_nsContent substringWithRange:range];
+            return [content substringWithRange:range];
         };
+    
+    
+        NSString *(^parseSender)(NSString *, NSString *) = ^NSString *(NSString *m_nsContent, NSString *m_nsSession) {
+            NSString *regularPattern = [m_nsContent containsString:@"has recalled a message."] ? @"<!\\[CDATA\\[(.*?)has recalled a message.\\]\\]>" : @"<!\\[CDATA\\[(.*?)撤回了一条消息\\]\\]>";
+            NSRegularExpression *regexCN = [NSRegularExpression regularExpressionWithPattern:regularPattern options:NSRegularExpressionCaseInsensitive error:nil];
+            NSRange range = NSMakeRange(0, m_nsContent.length);
+            NSTextCheckingResult *nameResult = [regexCN matchesInString:m_nsContent options:0 range:range].firstObject;
+            if (nameResult.numberOfRanges < 2) { return nil; }
+            NSString *senderName = [m_nsContent substringWithRange:[nameResult rangeAtIndex:1]];
         
-        NSString *(^parseSenderName)() = ^NSString *() {
-            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"<!\\[CDATA\\[(.*?)撤回了一条消息\\]\\]>" options:NSRegularExpressionCaseInsensitive error:nil];
-            
-            NSRange range = NSMakeRange(0, arg1.m_nsContent.length);
-            NSTextCheckingResult *result = [regex matchesInString:arg1.m_nsContent options:0 range:range].firstObject;
-            if (result.numberOfRanges < 2) { return nil; }
-            
-            return [arg1.m_nsContent substringWithRange:[result rangeAtIndex:1]];
+            if ([m_nsSession hasSuffix:@"@chatroom"]) {
+                NSArray *result = [m_nsContent componentsSeparatedByString:@":"];
+                NSString *wxid = result.firstObject;
+                return [NSString stringWithFormat:@"%@(%@)",senderName,wxid];
+            }
+            return senderName;
         };
-        
-        CMessageWrap *msgWrap = [[objc_getClass("CMessageWrap") alloc] initWithMsgType:0x2710];
-        BOOL isSender = [objc_getClass("CMessageWrap") isSenderFromMsgWrap:arg1];
-        
-        NSString *sendContent;
+
+        NSString *session = parseParam(arg1.m_nsContent, @"<session>", @"</session>");
+        NSString *newmsgid = parseParam(arg1.m_nsContent, @"<newmsgid>", @"</newmsgid>");
+
+        CContactMgr *contactMgr = [[objc_getClass("MMServiceCenter") defaultCenter] getService:objc_getClass("CContactMgr")];
+        CContact *selfContact = [contactMgr getSelfContact];
+
+        CMessageWrap *revokemsg = [self GetMsg:session n64SvrID:[newmsgid integerValue]];
+        BOOL isSender = [revokemsg.m_nsFromUsr isEqualToString:selfContact.m_nsUsrName];
+
+        BOOL en = [arg1.m_nsContent containsString:@"has recalled a message."];
+
         if (isSender) {
+            %orig;
+        } 
+        else
+        {
+            CMessageWrap *msgWrap = [[objc_getClass("CMessageWrap") alloc] initWithMsgType:0x2710];
             [msgWrap setM_nsFromUsr:arg1.m_nsToUsr];
             [msgWrap setM_nsToUsr:arg1.m_nsFromUsr];
-            sendContent = @"你撤回一条消息";
-        } else {
-            [msgWrap setM_nsToUsr:arg1.m_nsToUsr];
-            [msgWrap setM_nsFromUsr:arg1.m_nsFromUsr];
-            
-            NSString *name = parseSenderName();
-            sendContent = [NSString stringWithFormat:@"拦截 %@ 的一条撤回消息", name ? name : arg1.m_nsFromUsr];
+            [msgWrap setM_uiStatus:0x4];
+            [msgWrap setM_uiCreateTime:[arg1 m_uiCreateTime]];
+            NSString *sender = parseSender(arg1.m_nsContent,session);
+            NSString * sendContent = [NSString stringWithFormat:en ? @"Prevent %@ recalled a message." : @"拦截 %@ 的一条撤回消息", sender ? sender : arg1.m_nsFromUsr];
+            [msgWrap setM_nsContent:sendContent];
+
+            [self AddLocalMsg:session MsgWrap:msgWrap fixTime:0x1 NewMsgArriveNotify:0x0];
         }
-        [msgWrap setM_uiStatus:0x4];
-        [msgWrap setM_nsContent:sendContent];
-        [msgWrap setM_uiCreateTime:[arg1 m_uiCreateTime]];
-        
-        [self AddLocalMsg:parseSession() MsgWrap:msgWrap fixTime:0x1 NewMsgArriveNotify:0x0];
 	}
 }
 
