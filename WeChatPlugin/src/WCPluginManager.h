@@ -1,19 +1,11 @@
-//
-//  LLRedEnvelopesMgr.h
-//  test
-//
-//  Created by fqb on 2017/12/12.
-//  Copyright © 2017年 kevliule. All rights reserved.
-//
-
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <UIKit/UIKit.h>
-#import "WCRedEnvelopesHelper.h"
+#import "WeChat.h"
 
 @class POIInfo;
 
-@interface LLRedEnvelopesMgr : NSObject
+@interface WCPluginManager : NSObject
 
 @property (nonatomic, assign) BOOL haveNewRedEnvelopes; //是否有新的红包
 @property (nonatomic, assign) BOOL isHiddenRedEnvelopesReceiveView; //是否隐藏红包接受页面
@@ -47,7 +39,7 @@
 
 @property (nonatomic, copy) void(^openRedEnvelopesBlock)(void); //打开红包block
 
-+ (LLRedEnvelopesMgr *)shared;
++ (WCPluginManager *)shared;
 
 - (void)reset;
 

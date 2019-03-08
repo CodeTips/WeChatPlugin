@@ -1,14 +1,9 @@
-//
-//  RemoteControlManager.h
-//
-//
-
 #import <Foundation/Foundation.h>
-#import "WCRedEnvelopesHelper.h"
+#import "WeChat.h"
 
 #define PluginPath @"/Library/Application Support/WeChatPlugin/"
 
-@interface RemoteControlModel : NSObject
+@interface WCRemoteControlModel : NSObject
 
 @property (nonatomic, assign) BOOL enable;
 @property (nonatomic, copy) NSString *function;
@@ -20,7 +15,7 @@
 @end
 
 
-@interface RemoteControlManager : NSObject
+@interface WCRemoteControlManager : NSObject
 
 @property (nonatomic, strong)NSArray *remoteCommands;
 @property (nonatomic, strong)NSArray *enableRemoteCommands;

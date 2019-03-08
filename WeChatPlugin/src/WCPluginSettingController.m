@@ -1,22 +1,14 @@
-//
-//  LLSettingController.m
-//  test
-//
-//  Created by fqb on 2017/12/15.
-//  Copyright © 2017年 kevliule. All rights reserved.
-//
-
-#import "LLSettingController.h"
-#import "WCRedEnvelopesHelper.h"
-#import "LLRedEnvelopesMgr.h"
-#import "RemoteControlManager.h"
+#import "WCPluginSettingController.h"
+#import "WeChat.h"
+#import "WCPluginManager.h"
+#import "WCRemoteControlManager.h"
 #import <objc/runtime.h>
 
 static NSString * const kSettingControllerKey = @"SettingControllerKey";
 
-@interface LLSettingController () <MMPickLocationViewControllerDelegate>
+@interface WCPluginSettingController () <MMPickLocationViewControllerDelegate>
 
-@property (nonatomic, strong) LLSettingParam *settingParam; //设置参数
+@property (nonatomic, strong) WCPluginSettingParam *settingParam; //设置参数
 
 @property (nonatomic, strong) ContactsDataLogic *contactsDataLogic;
 
@@ -25,11 +17,11 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 
 @end
 
-@implementation LLSettingParam
+@implementation WCPluginSettingParam
 
 @end
 
-@implementation LLSettingController
+@implementation WCPluginSettingController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,9 +32,9 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 }
 
 - (void)commonInit{
-    _settingParam = [[LLSettingParam alloc] init];
+    _settingParam = [[WCPluginSettingParam alloc] init];
 
-    LLRedEnvelopesMgr *manager = [LLRedEnvelopesMgr shared];
+    WCPluginManager *manager = [WCPluginManager shared];
     _settingParam.isOpenRedEnvelopesHelper = manager.isOpenRedEnvelopesHelper;
     _settingParam.isOpenSportHelper = manager.isOpenSportHelper;
     _settingParam.isOpenBackgroundMode = manager.isOpenBackgroundMode;
@@ -63,14 +55,14 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
     _settingParam.wantSportStepCount = manager.wantSportStepCount;
     _settingParam.filterRoomDic = manager.filterRoomDic;
     _settingParam.virtualLocation = manager.virtualLocation;
-
+    
     _contactsDataLogic = [[NSClassFromString(@"ContactsDataLogic") alloc] initWithScene:0x0 delegate:nil sort:0x1 extendChatRoom:0x0];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onConfirmFilterChatRoom:) name:@"kConfirmFilterChatRoomNotification" object:nil];
 }
 
 - (void)exchangeMethod{
-    method_exchangeImplementations(class_getInstanceMethod(NSClassFromString(@"MMTableViewCellInfo"), @selector(actionEditorCell:)), class_getInstanceMethod([LLSettingController class], @selector(onTextFieldEditChanged:)));
+    method_exchangeImplementations(class_getInstanceMethod(NSClassFromString(@"WCTableViewNormalCellManager"), @selector(actionEditorCell:)), class_getInstanceMethod([WCPluginSettingController class], @selector(onTextFieldEditChanged:)));
 }
 
 - (void)setTableView{
@@ -85,29 +77,29 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 }
 
 - (void)reloadTableData{
-    MMTableViewCellInfo *openRedEnvelopesCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openRedEnvelopesSwitchHandler:) target:self title:@"是否开启红包助手" on:_settingParam.isOpenRedEnvelopesHelper];
-    MMTableViewCellInfo *backgroundModeCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openBackgroundMode:) target:self title:@"是否开启后台模式" on:_settingParam.isOpenBackgroundMode];
-    MMTableViewCellInfo *openAlertCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openRedEnvelopesAlertHandler:) target:self title:@"是否开启红包提醒" on:_settingParam.isOpenRedEnvelopesAlert];
-    MMTableViewCellInfo *delayTimeCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"延迟秒数" margin:120 tip:@"请输入延迟抢红包秒数" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%.2f",_settingParam.openRedEnvelopesDelaySecond] isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *openRedEnvelopesCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openRedEnvelopesSwitchHandler:) target:self title:@"是否开启红包助手" on:_settingParam.isOpenRedEnvelopesHelper];
+    WCTableViewNormalCellManager *backgroundModeCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openBackgroundMode:) target:self title:@"是否开启后台模式" on:_settingParam.isOpenBackgroundMode];
+    WCTableViewNormalCellManager *openAlertCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openRedEnvelopesAlertHandler:) target:self title:@"是否开启红包提醒" on:_settingParam.isOpenRedEnvelopesAlert];
+    WCTableViewNormalCellManager *delayTimeCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"延迟秒数" tip:@"请输入延迟抢红包秒数" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%.2f",_settingParam.openRedEnvelopesDelaySecond]];
     [delayTimeCell addUserInfoValue:@(UIKeyboardTypeDecimalPad) forKey:@"keyboardType"];
     [delayTimeCell addUserInfoValue:@"delayTimeCell" forKey:@"cellType"];
-    MMTableViewCellInfo *filterRoomCell = [NSClassFromString(@"MMTableViewCellInfo") normalCellForSel:@selector(onfilterRoomCellClicked) target:self title:@"过滤群聊" rightValue:self.settingParam.filterRoomDic.count?[NSString stringWithFormat:@"已选%ld个群聊",(long)self.settingParam.filterRoomDic.count]:@"暂未选择" accessoryType:1];
+    WCTableViewNormalCellManager *filterRoomCell = [NSClassFromString(@"WCTableViewNormalCellManager") normalCellForSel:@selector(onfilterRoomCellClicked) target:self title:@"过滤群聊" rightValue:self.settingParam.filterRoomDic.count?[NSString stringWithFormat:@"已选%ld个群聊",(long)self.settingParam.filterRoomDic.count]:@"暂未选择" accessoryType:1];
     objc_setAssociatedObject(delayTimeCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *openAutoReplyCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openAutoReplySwitchHandler:) target:self title:@"红包领取后自动回复" on:_settingParam.isOpenAutoReply];
-    MMTableViewCellInfo *autoReplyTextCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"自动回复内容" margin:120 tip:@"请输入自动回复内容" focus:NO autoCorrect:NO text:_settingParam.autoReplyText isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *openAutoReplyCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openAutoReplySwitchHandler:) target:self title:@"红包领取后自动回复" on:_settingParam.isOpenAutoReply];
+    WCTableViewNormalCellManager *autoReplyTextCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"自动回复内容" tip:@"请输入自动回复内容" focus:NO autoCorrect:NO text:_settingParam.autoReplyText];
     [autoReplyTextCell addUserInfoValue:@"autoReplyTextCell" forKey:@"cellType"];
     objc_setAssociatedObject(autoReplyTextCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *openAutoLeaveMessageCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openAutoLeaveMessageSwitchHandler:) target:self title:@"红包领取后自动留言" on:_settingParam.isOpenAutoLeaveMessage];
-    MMTableViewCellInfo *autoLeaveMessageTextCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"自动留言内容" margin:120 tip:@"请输入自动留言内容" focus:NO autoCorrect:NO text:_settingParam.autoLeaveMessageText isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *openAutoLeaveMessageCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openAutoLeaveMessageSwitchHandler:) target:self title:@"红包领取后自动留言" on:_settingParam.isOpenAutoLeaveMessage];
+    WCTableViewNormalCellManager *autoLeaveMessageTextCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"自动留言内容" tip:@"请输入自动留言内容" focus:NO autoCorrect:NO text:_settingParam.autoLeaveMessageText];
     [autoLeaveMessageTextCell addUserInfoValue:@"autoLeaveMessageTextCell" forKey:@"cellType"];
     objc_setAssociatedObject(autoLeaveMessageTextCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *openKeywordFilterCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openKeywordFilterSwitchHandler:) target:self title:@"是否打开关键字过滤" on:_settingParam.isOpenKeywordFilter];
-    MMTableViewCellInfo *keywordFilterTextCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"关键字过滤" margin:120 tip:@"多个关键字以英文逗号分隔" focus:NO autoCorrect:NO text:_settingParam.keywordFilterText isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *openKeywordFilterCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openKeywordFilterSwitchHandler:) target:self title:@"是否打开关键字过滤" on:_settingParam.isOpenKeywordFilter];
+    WCTableViewNormalCellManager *keywordFilterTextCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"关键字过滤" tip:@"多个关键字以英文逗号分隔" focus:NO autoCorrect:NO text:_settingParam.keywordFilterText];
     [keywordFilterTextCell addUserInfoValue:@"keywordFilterTextCell" forKey:@"cellType"];
     objc_setAssociatedObject(keywordFilterTextCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *isSnatchSelfCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(isSnatchSelfRedEnvelopesSwitchHandler:) target:self title:@"是否抢自己发的红包" on:_settingParam.isSnatchSelfRedEnvelopes];
+    WCTableViewNormalCellManager *isSnatchSelfCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(isSnatchSelfRedEnvelopesSwitchHandler:) target:self title:@"是否抢自己发的红包" on:_settingParam.isSnatchSelfRedEnvelopes];
 
-    MMTableViewSectionInfo *redEnvelopesSection = [NSClassFromString(@"MMTableViewSectionInfo") sectionInfoDefaut];
+    MMTableViewSectionInfo *redEnvelopesSection = [NSClassFromString(@"WCTableViewSectionManager") sectionInfoDefaut];
     [redEnvelopesSection setHeaderView:[[UIView alloc] initWithFrame:CGRectMake(0,0,0,20)]];
     [redEnvelopesSection addCell:openRedEnvelopesCell];
     [redEnvelopesSection addCell:backgroundModeCell];
@@ -122,30 +114,30 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
     [redEnvelopesSection addCell:keywordFilterTextCell];
     [redEnvelopesSection addCell:isSnatchSelfCell];
 
-    MMTableViewCellInfo *openVirtualLocationCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openVirtualLocationSwitchHandler:) target:self title:@"是否开启虚拟定位" on:_settingParam.isOpenVirtualLocation];
-    MMTableViewCellInfo *selectVirtualLocationCell = [NSClassFromString(@"MMTableViewCellInfo") normalCellForSel:@selector(onVirtualLocationCellClicked) target:self title:@"选择虚拟位置" rightValue:_settingParam.virtualLocation.poiName?:@"暂未选择" accessoryType:1];
+    WCTableViewNormalCellManager *openVirtualLocationCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openVirtualLocationSwitchHandler:) target:self title:@"是否开启虚拟定位" on:_settingParam.isOpenVirtualLocation];
+    WCTableViewNormalCellManager *selectVirtualLocationCell = [NSClassFromString(@"WCTableViewNormalCellManager") normalCellForSel:@selector(onVirtualLocationCellClicked) target:self title:@"选择虚拟位置" rightValue:_settingParam.virtualLocation.poiName?:@"暂未选择" accessoryType:1];
     
-    MMTableViewSectionInfo *virtualLocationSection = [NSClassFromString(@"MMTableViewSectionInfo") sectionInfoDefaut];
+    MMTableViewSectionInfo *virtualLocationSection = [NSClassFromString(@"WCTableViewSectionManager") sectionInfoDefaut];
     [virtualLocationSection setHeaderView:[[UIView alloc] initWithFrame:CGRectMake(0,0,0,20)]];
     [virtualLocationSection addCell:openVirtualLocationCell];
     [virtualLocationSection addCell:selectVirtualLocationCell];
 
-    MMTableViewCellInfo *openStepCountCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openStepCountSwitchHandler:) target:self title:@"是否开启运动助手" on:_settingParam.isOpenSportHelper];
-    MMTableViewCellInfo *stepCountModeCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(stepCountModeSwitchHandler:) target:self title:@"范围随机/固定步数" on:_settingParam.sportStepCountMode];
-    MMTableViewCellInfo *stepCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"固定运动步数" margin:120 tip:@"请输入想要的运动步数" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.wantSportStepCount] isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *openStepCountCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openStepCountSwitchHandler:) target:self title:@"是否开启运动助手" on:_settingParam.isOpenSportHelper];
+    WCTableViewNormalCellManager *stepCountModeCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(stepCountModeSwitchHandler:) target:self title:@"范围随机/固定步数" on:_settingParam.sportStepCountMode];
+    WCTableViewNormalCellManager *stepCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"固定运动步数" tip:@"请输入想要的运动步数" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.wantSportStepCount]];
     [stepCell addUserInfoValue:@(UIKeyboardTypeNumberPad) forKey:@"keyboardType"];
     [stepCell addUserInfoValue:@"stepCell" forKey:@"cellType"];
     objc_setAssociatedObject(stepCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *stepUpperLimitCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"运动步数上限" margin:120 tip:@"请输入运动步数上限" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.sportStepCountUpperLimit] isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *stepUpperLimitCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"运动步数上限" tip:@"请输入运动步数上限" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.sportStepCountUpperLimit]];
     [stepUpperLimitCell addUserInfoValue:@(UIKeyboardTypeNumberPad) forKey:@"keyboardType"];
     [stepUpperLimitCell addUserInfoValue:@"stepUpperLimitCell" forKey:@"cellType"];
     objc_setAssociatedObject(stepUpperLimitCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
-    MMTableViewCellInfo *stepLowerLimitCell = [NSClassFromString(@"MMTableViewCellInfo") editorCellForSel:nil target:nil title:@"运动步数下限" margin:120 tip:@"请输入运动步数下限" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.sportStepCountLowerLimit] isFitIpadClassic:YES];
+    WCTableViewNormalCellManager *stepLowerLimitCell = [NSClassFromString(@"WCTableViewNormalCellManager") editorCellForSel:nil target:nil title:@"运动步数下限" tip:@"请输入运动步数下限" focus:NO autoCorrect:NO text:[NSString stringWithFormat:@"%ld",(long)_settingParam.sportStepCountLowerLimit]];
     [stepLowerLimitCell addUserInfoValue:@(UIKeyboardTypeNumberPad) forKey:@"keyboardType"];
     [stepLowerLimitCell addUserInfoValue:@"stepLowerLimitCell" forKey:@"cellType"];
     objc_setAssociatedObject(stepLowerLimitCell, &kSettingControllerKey, self, OBJC_ASSOCIATION_ASSIGN);
 
-    MMTableViewSectionInfo *stepCountSection = [NSClassFromString(@"MMTableViewSectionInfo") sectionInfoDefaut];
+    MMTableViewSectionInfo *stepCountSection = [NSClassFromString(@"WCTableViewSectionManager") sectionInfoDefaut];
     [stepCountSection setHeaderView:[[UIView alloc] initWithFrame:CGRectMake(0,0,0,20)]];
     [stepCountSection addCell:openStepCountCell];
     [stepCountSection addCell:stepCountModeCell];
@@ -156,13 +148,13 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
         [stepCountSection addCell:stepCell];
     }
 
-    MMTableViewCellInfo *openAvoidRevokeMessageCell = [NSClassFromString(@"MMTableViewCellInfo") switchCellForSel:@selector(openAvoidRevokeMessageSwitchHandler:) target:self title:@"是否防好友撤回消息" on:_settingParam.isOpenAvoidRevokeMessage];
-
-    MMTableViewSectionInfo *revokeMessageSection = [NSClassFromString(@"MMTableViewSectionInfo") sectionInfoDefaut];
+    MMTableViewSectionInfo *revokeMessageSection = [NSClassFromString(@"WCTableViewSectionManager") sectionInfoDefaut];
     [revokeMessageSection setHeaderView:[[UIView alloc] initWithFrame:CGRectMake(0,0,0,20)]];
+    
+    WCTableViewNormalCellManager *openAvoidRevokeMessageCell = [NSClassFromString(@"WCTableViewNormalCellManager") switchCellForSel:@selector(openAvoidRevokeMessageSwitchHandler:) target:self title:@"是否防好友撤回消息" on:_settingParam.isOpenAvoidRevokeMessage];
     [revokeMessageSection addCell:openAvoidRevokeMessageCell];
 
-    MMTableViewCellInfo *remoteCellInfo = [objc_getClass("MMTableViewCellInfo") switchCellForSel:@selector(handleRemoteControl:) target:[RemoteControlManager sharedManager] title:@"远程控制" on:[RemoteControlManager sharedManager].isEnableRemoteControl];
+    WCTableViewNormalCellManager *remoteCellInfo = [objc_getClass("WCTableViewNormalCellManager") switchCellForSel:@selector(handleRemoteControl:) target:[WCRemoteControlManager sharedManager] title:@"远程控制" on:[WCRemoteControlManager sharedManager].isEnableRemoteControl];
     [revokeMessageSection addCell:remoteCellInfo];
 
     [_tableViewInfo clearAllSection];
@@ -177,7 +169,7 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 
 //点击保存
 - (void)clickSaveItem{
-    LLRedEnvelopesMgr *manager = [LLRedEnvelopesMgr shared];
+    WCPluginManager *manager = [WCPluginManager shared];
     manager.isOpenRedEnvelopesHelper = _settingParam.isOpenRedEnvelopesHelper;
     manager.isOpenSportHelper = _settingParam.isOpenSportHelper;
     manager.isOpenBackgroundMode = _settingParam.isOpenBackgroundMode;
@@ -226,8 +218,8 @@ static NSString * const kSettingControllerKey = @"SettingControllerKey";
 }
 
 - (void)onTextFieldEditChanged:(UITextField *)textField{
-    LLSettingController *settingController = objc_getAssociatedObject(self, &kSettingControllerKey);
-    MMTableViewCellInfo *cellInfo = (MMTableViewCellInfo *)self;
+    WCPluginSettingController *settingController = objc_getAssociatedObject(self, &kSettingControllerKey);
+    WCTableViewNormalCellManager *cellInfo = (WCTableViewNormalCellManager *)self;
     NSString *cellType = [cellInfo getUserInfoValueForKey:@"cellType"];
     if([cellType isEqualToString:@"delayTimeCell"]){
         settingController.settingParam.openRedEnvelopesDelaySecond = [textField.text floatValue];

@@ -1,5 +1,246 @@
+#import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
-#import "WeChatRedEnvelop.h"
+
+@class CMessageWrap;
+
+#pragma mark - Util
+
+@interface WCBizUtil : NSObject
+
++ (id)dictionaryWithDecodedComponets:(id)arg1 separator:(id)arg2;
+
+@end
+
+@interface SKBuiltinBuffer_t : NSObject
+
+@property(retain, nonatomic) NSData *buffer; // @dynamic buffer;
+
+@end
+
+#pragma mark - Manager
+
+@interface MMNewSessionMgr : NSObject
+- (unsigned int)GenSendMsgTime;
+@end
+
+#pragma mark - Message
+
+
+@interface FriendAsistSessionMgr : NSObject
+- (id)GetLastMessage:(id)arg1 HelloUser:(id)arg2 OnlyTo:(BOOL)arg3;
+@end
+
+@interface AutoSetRemarkMgr : NSObject
+- (id)GetStrangerAttribute:(id)arg1 AttributeName:(int)arg2;
+@end
+
+@interface CMessageMgr : NSObject
+
+- (id)GetMsg:(id)arg1 n64SvrID:(long long)arg2;
+- (void)AsyncOnSpecialSession:(id)arg1 MsgList:(id)arg2;
+- (id)GetHelloUsers:(id)arg1 Limit:(unsigned int)arg2 OnlyUnread:(BOOL)arg3;
+
+- (void)DelMsg:(id)arg1 MsgList:(id)arg2 DelAll:(BOOL)arg3;
+- (void)AddMsg:(id)arg1 MsgWrap:(id)arg2;
+- (void)onRevokeMsg:(id)arg1;
+- (id)GetMsgByCreateTime:(id)arg1 FromID:(unsigned int)arg2 FromCreateTime:(unsigned int)arg3 Limit:(unsigned int)arg4 LeftCount:(unsigned int *)arg5 FromSequence:(unsigned int)arg6;
+- (void)AddLocalMsg:(id)arg1 MsgWrap:(id)arg2 fixTime:(BOOL)arg3 NewMsgArriveNotify:(BOOL)arg4;
+- (void)AsyncOnAddMsg:(id)arg1 MsgWrap:(id)arg2;
+- (void)MessageReturn:(unsigned int)arg1 MessageInfo:(id)arg2 Event:(unsigned int)arg3;
+- (void)UpdateMessage:(id)arg1 MsgWrap:(id)arg2;
+- (void)AddEmoticonMsg:(id)arg1 MsgWrap:(id)arg2;
+
+- (void)sendMsg:(NSString *)msg toContactUsrName:(NSString *)userName;
+
+@end
+
+@interface CGroupMgr : NSObject
+- (BOOL)SetChatRoomDesc:(id)arg1 Desc:(id)arg2 Flag:(unsigned int)arg3;
+- (BOOL)CreateGroup:(id)arg1 withMemberList:(id)arg2;
+- (BOOL)DeleteGroupMember:(id)arg1 withMemberList:(id)arg2 scene:(unsigned long long)arg3;
+@end
+
+@interface MMLanguageMgr: NSObject
+
+- (id)getStringForCurLanguage:(id)arg1 defaultTo:(id)arg2;
+
+
+@end
+
+#pragma mark - RedEnvelop
+
+
+@interface WCRedEnvelopesLogicMgr: NSObject
+
+- (void)OpenRedEnvelopesRequest:(id)params;
+- (void)ReceiverQueryRedEnvelopesRequest:(id)arg1;
+- (void)GetHongbaoBusinessRequest:(id)arg1 CMDID:(unsigned int)arg2 OutputType:(unsigned int)arg3;
+- (void)OnWCToHongbaoCommonResponse:(id)arg1 Request:(id)arg2;
+
+/** Added Methods */
+- (unsigned int)calculateDelaySeconds;
+
+@end
+
+@interface HongBaoRes : NSObject
+
+@property(retain, nonatomic) SKBuiltinBuffer_t *retText; // @dynamic retText;
+@property(nonatomic) int cgiCmdid; // @dynamic cgiCmdid;
+
+@end
+
+@interface HongBaoReq : NSObject
+
+@property(retain, nonatomic) SKBuiltinBuffer_t *reqText; // @dynamic reqText;
+
+@end
+
+#pragma mark - Contact
+
+@interface GroupMember : NSObject
+@property(copy, nonatomic) NSString *m_nsNickName;; // @synthesize m_nsNickName;
+@property(nonatomic) unsigned int m_uiMemberStatus; // @synthesize m_uiMemberStatus;
+@property(copy, nonatomic) NSString *m_nsMemberName; // @synthesize m_nsMemberName;
+@end
+
+#pragma mark - QRCode
+
+@interface ScanQRCodeLogicController: NSObject
+
+@property(nonatomic) unsigned int fromScene;
+- (id)initWithViewController:(id)arg1 CodeType:(int)arg2;
+- (void)tryScanOnePicture:(id)arg1;
+- (void)doScanQRCode:(id)arg1;
+- (void)showScanResult;
+
+@end
+
+@interface NewQRCodeScanner: NSObject
+
+- (id)initWithDelegate:(id)arg1 CodeType:(int)arg2;
+- (void)notifyResult:(id)arg1 type:(id)arg2 version:(int)arg3;
+
+@end
+
+#pragma mark - MMTableView
+
+
+@interface SettingUtil : NSObject
++ (id)getLocalUsrName:(unsigned int)arg1;
+@end
+
+@interface MMLoadingView : UIView
+
+@property(retain, nonatomic) UILabel *m_label; // @synthesize m_label;
+@property (assign, nonatomic) BOOL m_bIgnoringInteractionEventsWhenLoading; // @synthesize m_bIgnoringInteractionEventsWhenLoading;
+
+- (void)setFitFrame:(long long)arg1;
+- (void)startLoading;
+- (void)stopLoading;
+- (void)stopLoadingAndShowError:(id)arg1;
+- (void)stopLoadingAndShowOK:(id)arg1;
+
+
+@end
+
+@interface MMTextView : UITextView
+@property(retain, nonatomic) NSString *placeholder;
+@end
+
+
+@interface ContactSelectView : UIView
+
+@property(nonatomic) unsigned int m_uiGroupScene; // @synthesize m_uiGroupScene;
+@property(nonatomic) BOOL m_bMultiSelect; // @synthesize m_bMultiSelect;
+@property(retain, nonatomic) NSMutableDictionary *m_dicMultiSelect; // @synthesize m_dicMultiSelect;
+
+- (id)initWithFrame:(struct CGRect)arg1 delegate:(id)arg2;
+- (void)initData:(unsigned int)arg1;
+- (void)initView;
+- (void)addSelect:(id)arg1;
+
+@property(nonatomic) BOOL m_bShowHistoryGroup; // @synthesize m_bShowHistoryGroup;
+@property(nonatomic) BOOL m_bShowRadarCreateRoom; // @synthesize m_bShowRadarCreateRoom;
+@property(retain, nonatomic) NSDictionary *m_dicExistContact; // @synthesize m_dicExistContact;
+- (void)initSearchBar;
+- (void)makeGroupCell:(id)arg1 head:(id)arg2 title:(id)arg3;
+
+@end
+
+#pragma mark - Logic
+
+@interface SayHelloDataLogic : NSObject
+@property (nonatomic, strong) NSMutableArray *m_arrHellos;
+- (void)loadData:(unsigned int)arg1;
++ (id)getContactFrom:(id)arg1;
+- (id)getContactForIndex:(unsigned int)arg1;
+- (void)onFriendAssistAddMsg:(NSArray *)arg1;
+@end
+
+@interface CContactVerifyLogic : NSObject
+- (void)startWithVerifyContactWrap:(id)arg1
+                            opCode:(unsigned int)arg2
+                        parentView:(id)arg3
+                      fromChatRoom:(BOOL)arg4;
+@end
+
+@interface SKBuiltinString_t : NSObject
+// Remaining properties
+@property(copy, nonatomic) NSString *string; // @dynamic string;
+@end
+
+@interface CreateChatRoomResponse : NSObject
+@property(strong, nonatomic) SKBuiltinString_t *chatRoomName; // @dynamic chatRoomName;
+@end
+
+
+
+#pragma mark - UtilCategory
+
+@interface NSMutableDictionary (SafeInsert)
+
+- (void)safeSetObject:(id)arg1 forKey:(id)arg2;
+
+@end
+
+@interface NSDictionary (NSDictionary_SafeJSON)
+
+- (id)arrayForKey:(id)arg1;
+- (id)dictionaryForKey:(id)arg1;
+- (double)doubleForKey:(id)arg1;
+- (float)floatForKey:(id)arg1;
+- (long long)int64ForKey:(id)arg1;
+- (long long)integerForKey:(id)arg1;
+- (id)stringForKey:(id)arg1;
+
+@end
+
+@interface NSString (NSString_SBJSON)
+
+- (id)JSONArray;
+- (id)JSONDictionary;
+- (id)JSONValue;
+
+@end
+
+
+@protocol MultiSelectContactsViewControllerDelegate <NSObject>
+- (void)onMultiSelectContactReturn:(NSArray *)arg1;
+
+@optional
+- (int)getFTSCommonScene;
+- (void)onMultiSelectContactCancelForSns;
+- (void)onMultiSelectContactReturnForSns:(NSArray *)arg1;
+@end
+
+@interface MultiSelectContactsViewController : UIViewController
+
+@property(nonatomic) BOOL m_bKeepCurViewAfterSelect; // @synthesize m_bKeepCurViewAfterSelect=_m_bKeepCurViewAfterSelect;
+@property(nonatomic) unsigned int m_uiGroupScene; // @synthesize m_uiGroupScene;
+@property(nonatomic, weak) id <MultiSelectContactsViewControllerDelegate> m_delegate; // @synthesize m_delegate;
+
+@end
 
 @interface WCPayInfoItem: NSObject
 @property(nonatomic) unsigned int m_sceneId; // @synthesize m_sceneId;
@@ -98,7 +339,7 @@
 @property(retain, nonatomic) CMessageWrap *m_msgWrap; // @synthesize m_msgWrap;
 @property(retain, nonatomic) CContact *m_contact; // @synthesize m_contact;
 
-@end 
+@end
 
 @interface UIViewController (ModalView)
 
@@ -109,7 +350,7 @@
 
 @interface NewMainFrameViewController : UIViewController
 {
-	UITableView *m_tableView;
+    UITableView *m_tableView;
 }
 
 - (void)tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2;
@@ -270,24 +511,44 @@
 
 @end
 
-@interface MMTableViewUserInfo : NSObject
+@interface WCTableViewCellManager : NSObject
 
-- (id)getUserInfoValueForKey:(id)arg1;
-- (void)addUserInfoValue:(id)arg1 forKey:(id)arg2;
++ (id)switchCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 on:(BOOL)arg4;
+@property(retain, nonatomic) id userInfo; // @synthesize userInfo=_userInfo;
 
 @end
 
-@interface MMTableViewCellInfo : MMTableViewUserInfo
-
-+ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 margin:(double)arg4 tip:(id)arg5 focus:(BOOL)arg6 autoCorrect:(BOOL)arg7 text:(id)arg8 isFitIpadClassic:(BOOL)arg9;
-+ (id)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 accessoryType:(long long)arg4;
-+ (id)switchCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 on:(BOOL)arg4;
-+ (id)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 rightValue:(id)arg4 accessoryType:(long long)arg5;
-+ (id)normalCellForTitle:(id)arg1 rightValue:(id)arg2;
-+ (id)urlCellForTitle:(id)arg1 url:(id)arg2;
-+ (id)editorCellForSel:(SEL)arg1 target:(id)arg2 tip:(id)arg3 focus:(BOOL)arg4 text:(id)arg5;
-@property(nonatomic) long long editStyle; // @synthesize editStyle=_editStyle;
-@property(retain, nonatomic) id userInfo;
+@interface WCTableViewNormalCellManager : WCTableViewCellManager
++ (WCTableViewNormalCellManager *)urlInnerCellForTitle:(id)arg1 url:(id)arg2;
++ (WCTableViewNormalCellManager *)urlInnerBlueCellForTitle:(id)arg1 rightValue:(id)arg2 url:(id)arg3;
++ (double)getAutoSizingRightMargin:(id)arg1;
++ (WCTableViewNormalCellManager *)badgeCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 badge:(id)arg4 rightValue:(id)arg5 imageName:(id)arg6;
++ (WCTableViewNormalCellManager *)badgeCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 badge:(id)arg4 rightValue:(id)arg5;
++ (WCTableViewNormalCellManager *)badgeCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 badge:(id)arg4;
++ (WCTableViewNormalCellManager *)editorCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 tip:(id)arg4 focus:(BOOL)arg5 autoCorrect:(BOOL)arg6 text:(id)arg7;
++ (WCTableViewNormalCellManager *)normalCellForTitle:(id)arg1 rightValue:(id)arg2 imageName:(id)arg3;
++ (WCTableViewNormalCellManager *)normalCellForTitle:(id)arg1 rightValue:(id)arg2;
++ (WCTableViewNormalCellManager *)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 accessoryType:(long long)arg4;
++ (WCTableViewNormalCellManager *)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 detail:(id)arg4 imageName:(id)arg5 accessoryType:(long long)arg6;
++ (WCTableViewNormalCellManager *)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 rightValue:(id)arg4 imageName:(id)arg5 accessoryType:(long long)arg6;
++ (WCTableViewNormalCellManager *)normalCellForSel:(SEL)arg1 target:(id)arg2 title:(id)arg3 rightValue:(id)arg4 accessoryType:(long long)arg5;
++ (WCTableViewNormalCellManager *)cellForMakeSel:(SEL)arg1 makeTarget:(id)arg2 height:(double)arg3 userInfo:(id)arg4;
++ (unsigned long long)accessoryType:(long long)arg1;
+- (void)switchDidChanged:(id)arg1;
+- (void)configureCell:(id)arg1 withRightConfig:(id)arg2;
+- (void)configureCell:(id)arg1 withLeftConfig:(id)arg2;
+- (double)cellSeparatorLeftInset;
+- (double)cellHeightFor:(id)arg1;
+- (void)configureCell:(id)arg1;
+- (id)init;
+- (void)makeEditorCell:(id)arg1;
+- (void)makeNormalCell:(id)arg1;
+- (void)makeNormalCell:(id)arg1 title:(id)arg2;
+- (void)actionUrlInnerCell;
+- (void)actionUrlCell;
+- (void)actionEditorCell:(id)arg1;
+- (id)getUserInfoValueForKey:(id)arg1;
+- (void)addUserInfoValue:(id)arg1 forKey:(id)arg2;
 
 @end
 
@@ -322,7 +583,7 @@
 
 @end
 
-@interface WCRedEnvelopesControlMgr: NSObject 
+@interface WCRedEnvelopesControlMgr: NSObject
 
 - (void)startReceiveRedEnvelopesLogic:(UIViewController *)controller Data:(WCRedEnvelopesControlData *)data;
 - (unsigned int)startReceiveGreetingRedEnvelopesLogic:(id)arg1 Data:(id)arg2;
@@ -440,3 +701,4 @@
 @interface SettingDiscoverEntranceViewController : SettingBaseViewController
 
 @end
+

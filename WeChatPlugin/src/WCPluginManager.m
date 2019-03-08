@@ -1,12 +1,4 @@
-//
-//  LLRedEnvelopesMgr.m
-//  test
-//
-//  Created by fqb on 2017/12/12.
-//  Copyright © 2017年 kevliule. All rights reserved.
-//
-
-#import "LLRedEnvelopesMgr.h"
+#import "WCPluginManager.h"
 
 #define kArchiverLocationFilePath [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0] stringByAppendingPathComponent:@"LLVirutalLocationPOIInfomation"]
 
@@ -30,13 +22,13 @@ static NSString * const openRedEnvelopesDelaySecondKey = @"openRedEnvelopesDelay
 static NSString * const wantSportStepCountKey = @"wantSportStepCountKey"; 
 static NSString * const filterRoomDicKey = @"filterRoomDicKey";
 
-@implementation LLRedEnvelopesMgr
+@implementation WCPluginManager
 
-+ (LLRedEnvelopesMgr *)shared{
-    static LLRedEnvelopesMgr *manager = nil;
++ (WCPluginManager *)shared{
+    static WCPluginManager *manager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        manager = [[LLRedEnvelopesMgr alloc] init];
+        manager = [[WCPluginManager alloc] init];
     });
     return manager;
 }
@@ -76,6 +68,31 @@ static NSString * const filterRoomDicKey = @"filterRoomDicKey";
     return self;
 }
 
+//保存用户设置
+- (void)saveUserSetting{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:_isOpenRedEnvelopesHelper forKey:isOpenRedEnvelopesHelperKey];
+    [userDefaults setBool:_isOpenSportHelper forKey:isOpenSportHelperKey];
+    [userDefaults setBool:_isOpenBackgroundMode forKey:isOpenBackgroundModeKey];
+    [userDefaults setBool:_isOpenRedEnvelopesAlert forKey:isOpenRedEnvelopesAlertKey];
+    [userDefaults setBool:_isOpenVirtualLocation forKey:isOpenVirtualLocationKey];
+    [userDefaults setBool:_isOpenAutoReply forKey:isOpenAutoReplyKey];
+    [userDefaults setBool:_isOpenAutoLeaveMessage forKey:isOpenAutoLeaveMessageKey];
+    [userDefaults setBool:_isOpenKeywordFilter forKey:isOpenKeywordFilterKey];
+    [userDefaults setBool:_isSnatchSelfRedEnvelopes forKey:isSnatchSelfRedEnvelopesKey];
+    [userDefaults setBool:_isOpenAvoidRevokeMessage forKey:isOpenAvoidRevokeMessageKey];
+    [userDefaults setBool:_sportStepCountMode forKey:sportStepCountModeKey];
+    [userDefaults setInteger:_sportStepCountUpperLimit forKey:sportStepCountUpperLimitKey];
+    [userDefaults setInteger:_sportStepCountLowerLimit forKey:sportStepCountLowerLimitkey];
+    [userDefaults setObject:_keywordFilterText forKey:keywordFilterTextKey];
+    [userDefaults setObject:_autoReplyText forKey:autoReplyTextKey];
+    [userDefaults setObject:_autoLeaveMessageText forKey:autoLeaveMessageTextKey];
+    [userDefaults setFloat:_openRedEnvelopesDelaySecond forKey:openRedEnvelopesDelaySecondKey];
+    [userDefaults setInteger:_wantSportStepCount forKey:wantSportStepCountKey];
+    [userDefaults setObject:_filterRoomDic forKey:filterRoomDicKey];
+    [userDefaults synchronize];
+}
+
 - (void)reset{
     _haveNewRedEnvelopes = NO;
     _isHiddenRedEnvelopesReceiveView = NO;
@@ -108,31 +125,6 @@ static NSString * const filterRoomDicKey = @"filterRoomDicKey";
     _openRedEnvelopesBlock = [openRedEnvelopesBlock copy];
 }
 
-//保存用户设置
-- (void)saveUserSetting{
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setBool:_isOpenRedEnvelopesHelper forKey:isOpenRedEnvelopesHelperKey];
-    [userDefaults setBool:_isOpenSportHelper forKey:isOpenSportHelperKey];
-    [userDefaults setBool:_isOpenBackgroundMode forKey:isOpenBackgroundModeKey];
-    [userDefaults setBool:_isOpenRedEnvelopesAlert forKey:isOpenRedEnvelopesAlertKey];
-    [userDefaults setBool:_isOpenVirtualLocation forKey:isOpenVirtualLocationKey];
-    [userDefaults setBool:_isOpenAutoReply forKey:isOpenAutoReplyKey];
-    [userDefaults setBool:_isOpenAutoLeaveMessage forKey:isOpenAutoLeaveMessageKey];
-    [userDefaults setBool:_isOpenKeywordFilter forKey:isOpenKeywordFilterKey];
-    [userDefaults setBool:_isSnatchSelfRedEnvelopes forKey:isSnatchSelfRedEnvelopesKey];
-    [userDefaults setBool:_isOpenAvoidRevokeMessage forKey:isOpenAvoidRevokeMessageKey];
-    [userDefaults setBool:_sportStepCountMode forKey:sportStepCountModeKey];
-    [userDefaults setInteger:_sportStepCountUpperLimit forKey:sportStepCountUpperLimitKey];
-    [userDefaults setInteger:_sportStepCountLowerLimit forKey:sportStepCountLowerLimitkey];
-    [userDefaults setObject:_keywordFilterText forKey:keywordFilterTextKey];
-    [userDefaults setObject:_autoReplyText forKey:autoReplyTextKey];
-    [userDefaults setObject:_autoLeaveMessageText forKey:autoLeaveMessageTextKey];
-    [userDefaults setFloat:_openRedEnvelopesDelaySecond forKey:openRedEnvelopesDelaySecondKey];
-    [userDefaults setInteger:_wantSportStepCount forKey:wantSportStepCountKey];
-    [userDefaults setObject:_filterRoomDic forKey:filterRoomDicKey];
-    [userDefaults synchronize];
-}
-/*
 - (void)setIsOpenRedEnvelopesHelper:(BOOL)isOpenRedEnvelopesHelper{
     _isOpenRedEnvelopesHelper = isOpenRedEnvelopesHelper;
 }
@@ -184,8 +176,6 @@ static NSString * const filterRoomDicKey = @"filterRoomDicKey";
 - (void)setVirtualLocation:(POIInfo *)virtualLocation{
     _virtualLocation = [virtualLocation retain];
 }
-*/
-
 //处理微信消息,过滤红包消息
 - (void)handleMessageWithMessageWrap:(CMessageWrap *)msgWrap isBackground:(BOOL)isBackground{
     if (msgWrap && msgWrap.m_uiMessageType == 49 && [self isSnatchRedEnvelopes:msgWrap]){

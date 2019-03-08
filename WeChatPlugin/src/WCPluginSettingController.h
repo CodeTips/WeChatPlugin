@@ -1,16 +1,8 @@
-//
-//  LLSettingController.h
-//  test
-//
-//  Created by fqb on 2017/12/15.
-//  Copyright © 2017年 kevliule. All rights reserved.
-//
-
 #import <UIKit/UIKit.h>
 
 @class POIInfo;
 
-@interface LLSettingParam : NSObject
+@interface WCPluginSettingParam : NSObject
 
 @property (nonatomic, assign) BOOL isOpenRedEnvelopesHelper; //是否开启红包助手
 @property (nonatomic, assign) BOOL isOpenSportHelper; //是否开启步数助手
@@ -35,6 +27,6 @@
 
 @end
 
-@interface LLSettingController : UIViewController
+@interface WCPluginSettingController : UIViewController
 
 @end

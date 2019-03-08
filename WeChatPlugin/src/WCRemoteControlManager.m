@@ -1,15 +1,10 @@
-//
-//  RemoteControlManager.m
-//  WeChatDylib
-//
-
-#import "RemoteControlManager.h"
+#import "WCRemoteControlManager.h"
 #import <objc/runtime.h>
 
 static NSString * const kRemoteControlEnableKey = @"kRemoteControlEnableKey";
 
 
-@implementation RemoteControlModel
+@implementation WCRemoteControlModel
 
 - (instancetype)initWithDict:(NSDictionary *)dict {
     self = [super init];
@@ -29,13 +24,13 @@ static NSString * const kRemoteControlEnableKey = @"kRemoteControlEnableKey";
 
 @end
 
-@implementation RemoteControlManager
+@implementation WCRemoteControlManager
 
 + (instancetype)sharedManager {
-    static RemoteControlManager *manager = nil;
+    static WCRemoteControlManager *manager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        manager = [[RemoteControlManager alloc] init];
+        manager = [[WCRemoteControlManager alloc] init];
         manager.isEnableRemoteControl = [[NSUserDefaults standardUserDefaults] boolForKey:kRemoteControlEnableKey];
     });
     return manager;
@@ -49,7 +44,7 @@ static NSString * const kRemoteControlEnableKey = @"kRemoteControlEnableKey";
             NSArray *originModels = [NSArray arrayWithContentsOfFile:remoteFilePath];
             NSMutableArray *newRemoteControlModels = [[NSMutableArray alloc] init];
             [originModels.firstObject enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                RemoteControlModel *model = [[RemoteControlModel alloc] initWithDict:obj];
+                WCRemoteControlModel *model = [[WCRemoteControlModel alloc] initWithDict:obj];
                 [newRemoteControlModels addObject:model];
             }];
             newRemoteControlModels;
@@ -63,8 +58,8 @@ static NSString * const kRemoteControlEnableKey = @"kRemoteControlEnableKey";
     if (!_enableRemoteCommands) {
         _enableRemoteCommands = ({
             NSMutableArray *enableCommands = [[NSMutableArray alloc] init];
-            [self.remoteCommands enumerateObjectsUsingBlock:^(RemoteControlModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if ([obj isKindOfClass:[RemoteControlModel class]] && obj.enable) {
+            [self.remoteCommands enumerateObjectsUsingBlock:^(WCRemoteControlModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([obj isKindOfClass:[WCRemoteControlModel class]] && obj.enable) {
                     [enableCommands addObject:obj];
                 }
             }];
@@ -77,7 +72,7 @@ static NSString * const kRemoteControlEnableKey = @"kRemoteControlEnableKey";
 - (void)sendRemoteControlCommand:(UIButton*)sender
 {
     NSInteger index = sender.tag;
-    RemoteControlModel *model = [self.enableRemoteCommands objectAtIndex:index - 100];
+    WCRemoteControlModel *model = [self.enableRemoteCommands objectAtIndex:index - 100];
     CMessageMgr *chatMgr = [[objc_getClass("MMServiceCenter") defaultCenter] getService:[objc_getClass("CMessageMgr") class]];
     [chatMgr sendMsg:model.command toContactUsrName:@"filehelper"];
 }
