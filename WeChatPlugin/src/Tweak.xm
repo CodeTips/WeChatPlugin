@@ -316,7 +316,7 @@
     
     
         NSString *(^parseSender)(NSString *, NSString *) = ^NSString *(NSString *m_nsContent, NSString *m_nsSession) {
-            NSString *regularPattern = [m_nsContent containsString:@"has recalled a message."] ? @"<!\\[CDATA\\[(.*?)has recalled a message.\\]\\]>" : @"<!\\[CDATA\\[(.*?)撤回了一条消息\\]\\]>";
+            NSString *regularPattern = [m_nsContent containsString:@"recalled a message"] ? @"<!\\[CDATA\\[(.*?)recalled a message\\]\\]>" : @"<!\\[CDATA\\[(.*?)撤回了一条消息\\]\\]>";
             NSRegularExpression *regexCN = [NSRegularExpression regularExpressionWithPattern:regularPattern options:NSRegularExpressionCaseInsensitive error:nil];
             NSRange range = NSMakeRange(0, m_nsContent.length);
             NSTextCheckingResult *nameResult = [regexCN matchesInString:m_nsContent options:0 range:range].firstObject;
@@ -340,7 +340,7 @@
         CMessageWrap *revokemsg = [self GetMsg:session n64SvrID:[newmsgid integerValue]];
         BOOL isSender = [revokemsg.m_nsFromUsr isEqualToString:selfContact.m_nsUsrName];
 
-        BOOL en = [arg1.m_nsContent containsString:@"has recalled a message."];
+        BOOL en = [arg1.m_nsContent containsString:@"recalled a message"];
 
         if (isSender) {
             %orig;
